@@ -24,5 +24,8 @@ Thumbs.db
 *.swp
 *.swo
 
+# Vercel
+.vercel
+
 # Test outputs
 test-results/
