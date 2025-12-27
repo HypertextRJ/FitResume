@@ -19,7 +19,7 @@ class Explainer {
             strengths: this.generateStrengths(matchResult),
             gaps: this.generateGaps(matchResult),
             recommendations: this.generateRecommendations(matchResult, jdData),
-            scoreJustification: this.generateScoreJustification(matchResult)
+            scoreJustification: this.generateScoreJustification(matchResult, jdData)
         };
     }
 
@@ -281,7 +281,7 @@ class Explainer {
     /**
      * Generate detailed score justification
      */
-    generateScoreJustification(matchResult) {
+    generateScoreJustification(matchResult, jdData) {
         const { breakdown } = matchResult;
 
         return {
@@ -291,21 +291,33 @@ class Explainer {
                     earned: breakdown.requiredSkills.points.toFixed(1),
                     possible: breakdown.requiredSkills.maxPoints,
                     percentage: ((breakdown.requiredSkills.points / breakdown.requiredSkills.maxPoints) * 100).toFixed(0),
-                    explanation: `Matched ${breakdown.requiredSkills.matchedSkills.length}/${breakdown.requiredSkills.totalRequired} required skills, missing ${breakdown.requiredSkills.missingSkills.length}`
+                    explanation: `Matched ${breakdown.requiredSkills.matchedSkills.length}/${breakdown.requiredSkills.totalRequired} required skills, missing ${breakdown.requiredSkills.missingSkills.length}`,
+                    matchedSkills: breakdown.requiredSkills.matchedSkills,
+                    missingSkills: breakdown.requiredSkills.missingSkills,
+                    partialMatches: breakdown.requiredSkills.partialMatches
                 },
                 {
                     category: 'Experience',
                     earned: breakdown.experience.points.toFixed(1),
                     possible: breakdown.experience.maxPoints,
                     percentage: ((breakdown.experience.points / breakdown.experience.maxPoints) * 100).toFixed(0),
-                    explanation: breakdown.experience.verdict
+                    explanation: breakdown.experience.verdict,
+                    details: {
+                        required: breakdown.experience.required,
+                        actual: breakdown.experience.actual,
+                        difference: breakdown.experience.difference
+                    }
                 },
                 {
                     category: 'Education',
                     earned: breakdown.education.points.toFixed(1),
                     possible: breakdown.education.maxPoints,
                     percentage: ((breakdown.education.points / breakdown.education.maxPoints) * 100).toFixed(0),
-                    explanation: breakdown.education.verdict
+                    explanation: breakdown.education.verdict,
+                    details: {
+                        required: breakdown.education.required,
+                        found: breakdown.education.highestDegree || 'None'
+                    }
                 },
                 {
                     category: 'Preferred Skills',
@@ -314,14 +326,22 @@ class Explainer {
                     percentage: breakdown.preferredSkills.maxPoints > 0
                         ? ((breakdown.preferredSkills.points / breakdown.preferredSkills.maxPoints) * 100).toFixed(0)
                         : '0',
-                    explanation: `Matched ${breakdown.preferredSkills.matchedSkills.length}/${breakdown.preferredSkills.totalPreferred} preferred skills`
+                    explanation: `Matched ${breakdown.preferredSkills.matchedSkills.length}/${breakdown.preferredSkills.totalPreferred} preferred skills`,
+                    matchedSkills: breakdown.preferredSkills.matchedSkills,
+                    // Add missing preferred skills for display
+                    missingSkills: (jdData.preferredSkills || [])
+                        .filter(skill => !breakdown.preferredSkills.matchedSkills.includes(skill))
                 },
                 {
                     category: 'Keyword Density',
                     earned: breakdown.keywordDensity.points.toFixed(1),
                     possible: breakdown.keywordDensity.maxPoints,
                     percentage: ((breakdown.keywordDensity.points / breakdown.keywordDensity.maxPoints) * 100).toFixed(0),
-                    explanation: breakdown.keywordDensity.verdict
+                    explanation: breakdown.keywordDensity.verdict,
+                    density: breakdown.keywordDensity.density,
+                    matchedKeywords: breakdown.keywordDensity.matchedKeywords,
+                    // Add top JD keywords for suggestions
+                    expectedKeywords: (jdData.keywords || []).slice(0, 10)
                 },
                 {
                     category: 'Format & Clarity',

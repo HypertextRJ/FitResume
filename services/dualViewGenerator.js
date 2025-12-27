@@ -52,7 +52,7 @@ class DualViewGenerator {
 
         // Keyword density
         if (breakdown.keywordDensity) {
-            const density = Math.round(breakdown.keywordDensity.density * 100);
+            const density = breakdown.keywordDensity.density || 0;
             points.push(`Keyword match: ${density}%`);
         }
 
@@ -104,36 +104,36 @@ class DualViewGenerator {
 
         // Overall assessment
         let assessment;
-        if (score >= 80) {
-            assessment = 'Strong candidate worth interviewing';
-        } else if (score >= 65) {
-            assessment = 'Good potential - review experience depth and cultural fit';
-        } else if (score >= 50) {
-            assessment = 'Borderline - may work if flexible on some requirements';
+        if (score >= 90) {
+            assessment = 'Exceptional candidate - Immediate interview recommended';
+        } else if (score >= 76) {
+            assessment = 'Strong candidate - Review experience depth and cultural fit';
+        } else if (score >= 61) {
+            assessment = 'Potential fit - but has significant gaps to verify';
         } else {
-            assessment = 'Significant gaps - likely not a good fit unless extraordinary circumstances';
+            assessment = 'Does not meet core requirements - Likely rejection';
         }
 
         return {
             summary: `Human assessment: ${assessment}`,
             evaluation: 'This evaluation considers context, potential, and transferable skills beyond strict keyword matching.',
             observations,
-            recommendation: this.generateRecommendation(score, breakdown)
+            recommendation: this.generateRecommendation(score)
         };
     }
 
     /**
      * Generate recruiter recommendation
      */
-    generateRecommendation(score, breakdown) {
-        if (score >= 75) {
+    generateRecommendation(score) {
+        if (score >= 80) {
             return 'RECOMMEND: Schedule phone screen';
-        } else if (score >= 60) {
+        } else if (score >= 65) {
             return 'CONSIDER: Review portfolio/GitHub if available';
-        } else if (score >= 45) {
-            return 'MAYBE: Only if having difficulty finding candidates';
+        } else if (score >= 50) {
+            return 'HOLD: Only if hiring is difficult';
         } else {
-            return 'PASS: Focus on stronger matches';
+            return 'REJECT: Focus on stronger matches';
         }
     }
 }

@@ -76,10 +76,10 @@ class ReadinessMeter {
 
         const { strong, moderate, weak, total } = evidenceSummary;
 
-        // Calculate weighted score
-        const score = Math.round(
+        // Calculate weighted score (handle division by zero)
+        const score = total > 0 ? Math.round(
             ((strong * 100) + (moderate * 60) + (weak * 20)) / total
-        );
+        ) : 0;
 
         return {
             score,

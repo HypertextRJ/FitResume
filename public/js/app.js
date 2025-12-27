@@ -268,18 +268,32 @@ function renderRejectionAnalysis(data) {
 function renderReadinessMeter(meter) {
   if (!meter) return '';
 
-  const renderBar = (label, data, color) => `
+  // Helper to get color based on score
+  const getColorForScore = (score) => {
+    if (score >= 70) return 'var(--color-success)';  // Green
+    if (score >= 40) return 'var(--color-warning)';  // Yellow/Orange
+    return 'var(--color-error)';  // Red
+  };
+
+  const renderBar = (label, data) => {
+    // Handle null/undefined data
+    const score = data?.score ?? 0;
+    const displayLabel = data?.label || 'Not available';
+    const color = getColorForScore(score);
+
+    return `
       <div class="meter-container">
         <div class="meter-header">
            <span>${label}</span>
-           <span style="color:${color}; font-weight:700;">${data.score}/100</span>
+           <span style="color:${color}; font-weight:700;">${score}/100</span>
         </div>
         <div class="meter-bar-bg">
-           <div class="meter-bar-fill" style="width: ${data.score}%; background: ${color};"></div>
+           <div class="meter-bar-fill" style="width: ${score}%; background: ${color};"></div>
         </div>
-        <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:0.25rem;">${data.label}</p>
+        <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:0.25rem;">${displayLabel}</p>
       </div>
     `;
+  };
 
   return `
     <div class="section-card">
@@ -289,9 +303,9 @@ function renderReadinessMeter(meter) {
         </svg>
         Resume Readiness Meter
       </h3>
-      ${renderBar('ATS Compatibility', meter.atsCompatibility, 'var(--color-purple-500)')}
-      ${renderBar('Recruiter Readability', meter.recruiterReadability, 'var(--color-blue-500)')}
-      ${renderBar('Evidence Strength', meter.evidenceStrength, 'var(--color-success)')}
+      ${renderBar('ATS Compatibility', meter.atsCompatibility)}
+      ${renderBar('Recruiter Readability', meter.recruiterReadability)}
+      ${renderBar('Evidence Strength', meter.evidenceStrength)}
       <p style="font-size:0.85rem; margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.1);">
          <strong>Note:</strong> These are 3 independent dimensions. A high ATS score doesn't always mean high readability.
       </p>
@@ -358,27 +372,27 @@ function renderSkillEvidence(evidence) {
              <div style="font-weight:700; color:var(--color-success); margin-bottom:0.5rem; display:flex; justify-content:space-between;">
                 STRONG <span>${evidence.summary.strong}</span>
              </div>
-             <div class="skill-cloud">${strongSkills || '<em style="font-size:0.8rem; opacity:0.6;">None</em>'}</div>
-          </div>
+              <div class="skill-cloud">${strongSkills || '<em style="font-size:0.8rem; opacity:0.6;">None</em>'}</div>
+           </div>
 
           <!-- Weak/Moderate -->
           <div class="evidence-col" style="background:rgba(245,158,11,0.05); padding:0.75rem; border-radius:8px; border:1px solid rgba(245,158,11,0.1);">
              <div style="font-weight:700; color:var(--color-warning); margin-bottom:0.5rem; display:flex; justify-content:space-between;">
                 WEAK / MOD <span>${evidence.summary.moderate + evidence.summary.weak}</span>
              </div>
-             <div class="skill-cloud">${weakSkills || '<em style="font-size:0.8rem; opacity:0.6;">None</em>'}</div>
-          </div>
+              <div class="skill-cloud">${weakSkills || '<em style="font-size:0.8rem; opacity:0.6;">None</em>'}</div>
+           </div>
 
           <!-- Missing -->
           <div class="evidence-col" style="background:rgba(239,68,68,0.05); padding:0.75rem; border-radius:8px; border:1px solid rgba(239,68,68,0.1);">
              <div style="font-weight:700; color:var(--color-error); margin-bottom:0.5rem; display:flex; justify-content:space-between;">
                 MISSING <span>${evidence.summary.missing}</span>
              </div>
-             <div class="skill-cloud">${missingSkills || '<em style="font-size:0.8rem; opacity:0.6;">None</em>'}</div>
-          </div>
+              <div class="skill-cloud">${missingSkills || '<em style="font-size:0.8rem; opacity:0.6;">None</em>'}</div>
+           </div>
        </div>
        <p style="font-size:0.85rem; color:var(--color-text-secondary); margin-top:0.5rem;">
-         <strong>Strong:</strong> Found in Experience/Projects. <strong>Weak:</strong> List only. <strong>Missing:</strong> Not found in evidence check.
+         <strong>Strong:</strong> Found in Experience/Projects. <strong>Weak:</strong> Listed in skills only. <strong>Missing:</strong> Required skills not found in your resume.
        </p>
     </div>`;
 }
@@ -562,6 +576,13 @@ function renderSummary(summary) {
 }
 
 function renderBreakdown(breakdown, justification) {
+  // Helper to get color based on percentage
+  const getColorForPercentage = (percentage) => {
+    if (percentage >= 70) return 'var(--color-success)';  // Green
+    if (percentage >= 40) return 'var(--color-warning)';  // Yellow/Orange
+    return 'var(--color-error)';  // Red
+  };
+
   return `
     <div class="section-card">
       <h3 class="section-title">
@@ -572,20 +593,74 @@ function renderBreakdown(breakdown, justification) {
         Score Breakdown
       </h3>
       <div class="breakdown-grid">
-        ${justification.breakdown.map(item => `
+        ${justification.breakdown.map(item => {
+    const percentage = item.percentage || 0;
+    const barColor = getColorForPercentage(percentage);
+
+    return `
           <div class="breakdown-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
               <h4 style="font-weight: 700; color: var(--color-text-primary);">${item.category}</h4>
-              <span style="font-weight: 700; font-size: 1.25rem; color: var(--color-purple-500);">
+              <span style="font-weight: 700; font-size: 1.25rem; color: ${barColor};">
                 ${item.earned}/${item.possible}
               </span>
             </div>
             <div style="background: rgba(139, 92, 246, 0.1); border-radius: 0.5rem; height: 8px; overflow: hidden; margin-bottom: 0.5rem;">
-              <div style="background: linear-gradient(90deg, var(--color-purple-500), var(--color-blue-500)); height: 100%; width: ${item.percentage}%; transition: width 1s ease-in-out;"></div>
+              <div style="background: ${barColor}; height: 100%; width: ${percentage}%; transition: width 1s ease-in-out;"></div>
             </div>
-            <p style="font-size: 0.875rem; color: var(--color-text-muted);">${item.explanation}</p>
+            <p style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">${item.explanation}</p>
+            
+            ${item.category === 'Required Skills' ? `
+              <div class="skill-cloud" style="margin-top: 0.5rem;">
+                ${(item.matchedSkills || []).map(s => `<span class="skill-tag" style="background:rgba(16,185,129,0.1); color:var(--color-success); border-color:rgba(16,185,129,0.3);">✓ ${s.skill || s}</span>`).join('')}
+                ${(item.partialMatches || []).map(s => `<span class="skill-tag" style="background:rgba(245,158,11,0.1); color:var(--color-warning); border-color:rgba(245,158,11,0.3);">~ ${s.skill || s}</span>`).join('')}
+                ${(item.missingSkills || []).map(s => `<span class="skill-tag" style="background:rgba(239,68,68,0.1); color:var(--color-error); border-color:rgba(239,68,68,0.3);">✗ ${s}</span>`).join('')}
+              </div>
+            ` : ''}
+
+            ${item.category === 'Experience' && item.details ? `
+              <div class="skill-cloud" style="margin-top: 0.5rem;">
+                <span class="skill-tag" style="background:rgba(59,130,246,0.1); color:#60a5fa; border-color:rgba(59,130,246,0.3);">🎯 Target: ${item.details.required}y</span>
+                <span class="skill-tag" style="background:rgba(139,92,246,0.1); color:#a78bfa; border-color:rgba(139,92,246,0.3);">📊 Actual: ${item.details.actual}y</span>
+                ${item.details.difference < 0 ? `<span class="skill-tag" style="background:rgba(239,68,68,0.1); color:var(--color-error); border-color:rgba(239,68,68,0.3);">⚠️ Gap: ${Math.abs(item.details.difference)}y</span>` : `<span class="skill-tag" style="background:rgba(16,185,129,0.1); color:var(--color-success); border-color:rgba(16,185,129,0.3);">✓ Meets Requirement</span>`}
+              </div>
+            ` : ''}
+
+            ${item.category === 'Education' && item.details ? `
+              <div class="skill-cloud" style="margin-top: 0.5rem;">
+                <span class="skill-tag" style="background:rgba(59,130,246,0.1); color:#60a5fa; border-color:rgba(59,130,246,0.3);">🎓 Required: ${item.details.required}</span>
+                <span class="skill-tag" style="background:${item.earned > 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'}; color:${item.earned > 0 ? 'var(--color-success)' : 'var(--color-error)'}; border-color:${item.earned > 0 ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'};"> 
+                  ${item.earned > 0 ? '✓' : '✗'} Found: ${item.details.found}
+                </span>
+              </div>
+            ` : ''}
+
+            ${item.category === 'Preferred Skills' ? `
+               <div class="skill-cloud" style="margin-top: 0.5rem;">
+                ${(item.matchedSkills || []).map(s => `<span class="skill-tag" style="background:rgba(16,185,129,0.1); color:var(--color-success); border-color:rgba(16,185,129,0.3);">✓ ${s}</span>`).join('')}
+                ${(item.missingSkills || []).map(s => `<span class="skill-tag" style="background:rgba(239,68,68,0.1); color:var(--color-error); border-color:rgba(239,68,68,0.3);">✗ ${s}</span>`).join('')}
+                ${(item.matchedSkills || []).length === 0 && (item.missingSkills || []).length === 0 ? '<em style="font-size:0.8rem; opacity:0.6;">No preferred skills specified</em>' : ''}
+              </div>
+            ` : ''}
+
+            ${item.category === 'Keyword Density' ? `
+              <div class="skill-cloud" style="margin-top: 0.5rem;">
+                <span class="skill-tag" style="background:${barColor === 'var(--color-success)' ? 'rgba(16,185,129,0.1)' : barColor === 'var(--color-warning)' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)'}; color:${barColor}; border-color:${barColor === 'var(--color-success)' ? 'rgba(16,185,129,0.3)' : barColor === 'var(--color-warning)' ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.3)'};" >📈 Match: ${item.density || 0}%</span>
+                ${(item.matchedKeywords || []).length > 0 ? item.matchedKeywords.slice(0, 10).map(kw => `<span class="skill-tag" style="background:rgba(139,92,246,0.05); color:var(--color-text-muted); border-color:rgba(139,92,246,0.2);">${kw}</span>`).join('') : ''}
+                ${(item.matchedKeywords || []).length === 0 && (item.expectedKeywords || []).length > 0 ? `<div style="margin-top:0.5rem; font-size:0.85rem; color:var(--color-text-secondary);">💡 <strong>Add these keywords:</strong> ${item.expectedKeywords.slice(0, 8).map(kw => `<span class="skill-tag" style="background:rgba(245,158,11,0.05); color:var(--color-warning); border-color:rgba(245,158,11,0.2); margin-left:0.25rem;">${kw}</span>`).join('')}</div>` : ''}
+              </div>
+            ` : ''}
+
+            ${item.category === 'Format & Clarity' ? `
+              <div class="skill-cloud" style="margin-top: 0.5rem;">
+                <span class="skill-tag" style="background:${barColor === 'var(--color-success)' ? 'rgba(16,185,129,0.1)' : barColor === 'var(--color-warning)' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)'}; color:${barColor}; border-color:${barColor === 'var(--color-success)' ? 'rgba(16,185,129,0.3)' : barColor === 'var(--color-warning)' ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.3)'};"> 
+                  ${percentage >= 70 ? '✓ Clean Format' : percentage >= 40 ? '⚠️ Minor Issues' : '✗ Formatting Issues'}
+                </span>
+              </div>
+            ` : ''}
           </div>
-        `).join('')}
+        `;
+  }).join('')}
       </div>
     </div>
   `;

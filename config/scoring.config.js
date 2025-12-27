@@ -84,11 +84,11 @@ module.exports = {
 
   // Score interpretation ranges
   SCORE_RANGES: {
-    EXCEPTIONAL: { min: 90, max: 100, label: 'Exceptional Match', color: '#059669' },
-    VERY_GOOD: { min: 76, max: 89, label: 'Very Good Match', color: '#10b981' },
-    GOOD: { min: 61, max: 75, label: 'Good Match', color: '#fbbf24' },
-    FAIR: { min: 41, max: 60, label: 'Fair Match', color: '#f59e0b' },
-    POOR: { min: 0, max: 40, label: 'Poor Match', color: '#ef4444' }
+    EXCEPTIONAL: { min: 90, max: 100, label: 'Exceptional Match (Top 1%)', color: '#059669' },
+    VERY_GOOD: { min: 76, max: 89, label: 'Strong Match (Interview Candidate)', color: '#10b981' },
+    GOOD: { min: 61, max: 75, label: 'Good Match (Manual Review Needed)', color: '#fbbf24' },
+    FAIR: { min: 41, max: 60, label: 'Fair Match (Likely Rejection)', color: '#f59e0b' },
+    POOR: { min: 0, max: 40, label: 'Critical Mismatch (Auto-Reject)', color: '#ef4444' }
   }
 };
 

@@ -30,7 +30,11 @@ class AdvancedInsights {
         // 3. Analyze skill evidence (needed for other features)
         const matchedSkills = matchResult.breakdown.requiredSkills ?
             matchResult.breakdown.requiredSkills.matchedSkills : [];
-        const skillEvidence = skillEvidenceAnalyzer.analyzeSkillEvidence(matchedSkills, resumeData);
+        const missingSkills = matchResult.breakdown.requiredSkills ?
+            matchResult.breakdown.requiredSkills.missingSkills : [];
+
+        // Analyze evidence for matched skills AND mark missing skills as MISSING evidence
+        const skillEvidence = skillEvidenceAnalyzer.analyzeSkillEvidence(matchedSkills, resumeData, missingSkills);
         const evidenceSummary = skillEvidenceAnalyzer.generateSummary(skillEvidence);
 
         // 4. Detect risk flags

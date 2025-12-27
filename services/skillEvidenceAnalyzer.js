@@ -7,12 +7,13 @@
 
 class SkillEvidenceAnalyzer {
     /**
-     * Analyze evidence strength for matched skills
+     * Analyze evidence strength for matched skills AND missing skills
      * @param {Array} matchedSkills - Skills that were matched
      * @param {Object} resumeData - Full resume data with sections
+     * @param {Array} missingSkills - Skills that were not found in resume (optional)
      * @returns {Array} Evidence analysis for each skill
      */
-    analyzeSkillEvidence(matchedSkills, resumeData) {
+    analyzeSkillEvidence(matchedSkills, resumeData, missingSkills = []) {
         const evidenceReport = [];
         const resumeText = resumeData.rawText || '';
 
@@ -26,6 +27,17 @@ class SkillEvidenceAnalyzer {
             const skillName = match.matchedAs || match.skill;
             const evidence = this.checkSkillEvidence(skillName, sections, hasSections);
             evidenceReport.push(evidence);
+        });
+
+        // Add missing skills as MISSING evidence
+        missingSkills.forEach(skill => {
+            evidenceReport.push({
+                skill: skill,
+                strength: 'MISSING',
+                verdict: 'Not found in resume',
+                hasContextualUsage: false,
+                recommendation: `Add ${skill} to your resume - it's a required skill`
+            });
         });
 
         return evidenceReport;
@@ -138,19 +150,38 @@ class SkillEvidenceAnalyzer {
      * Generate summary stats
      */
     generateSummary(evidenceReport) {
-        const strong = evidenceReport.filter(e => e.strength === 'STRONG').length;
-        const moderate = evidenceReport.filter(e => e.strength === 'MODERATE').length;
-        const weak = evidenceReport.filter(e => e.strength === 'WEAK').length;
-        const missing = evidenceReport.filter(e => e.strength === 'MISSING').length;
+        if (!evidenceReport || !Array.isArray(evidenceReport)) {
+            return {
+                strong: 0,
+                moderate: 0,
+                weak: 0,
+                missing: 0,
+                total: 0,
+                overallStrength: 'WEAK'
+            };
+        }
+
+        const strong = evidenceReport.filter(e => e && e.strength === 'STRONG').length;
+        const moderate = evidenceReport.filter(e => e && e.strength === 'MODERATE').length;
+        const weak = evidenceReport.filter(e => e && e.strength === 'WEAK').length;
+        const missing = evidenceReport.filter(e => e && e.strength === 'MISSING').length;
+
+        const total = evidenceReport.length;
+
+        // Safe strength calculation
+        let overallStrength = 'WEAK';
+        if (total > 0) {
+            if (strong >= total * 0.6) overallStrength = 'STRONG';
+            else if ((strong + moderate) >= total * 0.5) overallStrength = 'MODERATE';
+        }
 
         return {
             strong,
             moderate,
             weak,
             missing,
-            total: evidenceReport.length,
-            overallStrength: strong >= evidenceReport.length * 0.6 ? 'STRONG' :
-                (strong + moderate) >= evidenceReport.length * 0.5 ? 'MODERATE' : 'WEAK'
+            total,
+            overallStrength
         };
     }
 
