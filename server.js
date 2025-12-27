@@ -19,7 +19,8 @@ app.get('/', (req, res) => {
 });
 
 // Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
+// Vercel serverless only allows writing to /tmp
+const uploadsDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, 'uploads');
 fs.mkdir(uploadsDir, { recursive: true }).catch(console.error);
 
 // Import cleanup service
