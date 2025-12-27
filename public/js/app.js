@@ -523,7 +523,7 @@ function renderScoreGauge(score, color) {
           style="transition: stroke-dashoffset 2s ease-in-out;"
         />
         <!-- Score text -->
-        <text x="150" y="150" text-anchor="middle" dy="0.3em" font-size="64" font-weight="800" fill="${color}">
+        <text x="150" y="150" text-anchor="middle" dy="0.3em" font-size="64" font-weight="800" fill="#FFFFFF">
           ${score}
         </text>
         <text x="150" y="190" text-anchor="middle" font-size="20" fill="#9CA3AF">
