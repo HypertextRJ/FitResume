@@ -11,7 +11,12 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Explicitly serve index.html for root route (Vercel fix)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -166,36 +171,34 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Internal server error' });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log('\n');
-    console.log('╔════════════════════════════════════════════════════════╗');
-    console.log('║  🎯 FitResume - ATS Compatibility                     ║');
-    console.log('║  📊 Strict • Explainable • Job-Specific               ║');
-    console.log('╠════════════════════════════════════════════════════════╣');
-    console.log(`║  🚀 Server running on http://localhost:${PORT}        ║`);
-    console.log(`║  🤖 AI Provider: ${process.env.AI_PROVIDER || 'GEMINI'}                            ║`);
-    console.log('║  📝 Status: READY                                     ║');
-    console.log('╚════════════════════════════════════════════════════════╝');
-    console.log('\n');
-
-    // Verify AI configuration
-    const aiProvider = process.env.AI_PROVIDER || 'gemini';
-    const hasGemini = process.env.GEMINI_API_KEY;
-    const hasOpenAI = process.env.OPENAI_API_KEY;
-
-    if (!hasGemini && !hasOpenAI) {
-        console.warn('\n⚠️  WARNING: No AI API keys configured!');
-        console.warn('   Please add GEMINI_API_KEY or OPENAI_API_KEY to .env file\n');
-    } else if (aiProvider === 'gemini' && !hasGemini) {
-        console.warn('\n⚠️  WARNING: AI_PROVIDER set to gemini but GEMINI_API_KEY is missing!\n');
-    } else if (aiProvider === 'openai' && !hasOpenAI) {
-        console.warn('\n⚠️  WARNING: AI_PROVIDER set to openai but OPENAI_API_KEY is missing!\n');
-    }
-
-    // Start automated cleanup service
-    console.log('\n🔒 Privacy & Data Protection:');
-    cleanupService.startScheduledCleanup();
-});
-
+// Export for Vercel
 module.exports = app;
+
+// Start server only if run directly (Local Development)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log('\n');
+        console.log('╔════════════════════════════════════════════════════════╗');
+        console.log('║  🎯 FitResume - ATS Compatibility                     ║');
+        console.log('║  📊 Strict • Explainable • Job-Specific               ║');
+        console.log('╠════════════════════════════════════════════════════════╣');
+        console.log(`║  🚀 Server running on http://localhost:${PORT}        ║`);
+        console.log(`║  🤖 AI Provider: ${process.env.AI_PROVIDER || 'GEMINI'}                            ║`);
+        console.log('║  📝 Status: READY                                     ║');
+        console.log('╚════════════════════════════════════════════════════════╝');
+        console.log('\n');
+
+        // Verify AI configuration
+        const aiProvider = process.env.AI_PROVIDER || 'gemini';
+        console.log(`✅ ${aiProvider === 'openai' ? 'OpenAI' : 'Gemini AI'} initialized (${aiProvider === 'openai' ? process.env.OPENAI_MODEL : process.env.GEMINI_MODEL})`);
+
+        if (aiProvider === 'openai' && !process.env.OPENAI_API_KEY) {
+            console.warn('⚠️  WARNING: OpenAI API key is missing!');
+        } else if (aiProvider === 'gemini' && !process.env.GEMINI_API_KEY) {
+            console.warn('⚠️  WARNING: Gemini API key is missing!');
+        }
+
+        console.log('\n🔒 Privacy & Data Protection:');
+        cleanupService.startScheduledCleanup();
+    });
+}
