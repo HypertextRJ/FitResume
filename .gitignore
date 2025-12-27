@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+
+# Environment variables
+.env
+.env.local
+
+# Uploads
+uploads/
+temp/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test outputs
+test-results/

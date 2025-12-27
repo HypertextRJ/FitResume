@@ -1,0 +1,58 @@
+# Sample Job Description for Testing
+
+**Job Title:** Senior Full-Stack Software Engineer
+
+## About the Role
+
+We are seeking an experienced Full-Stack Software Engineer to join our engineering team. You will be responsible for designing, developing, and maintaining scalable web applications using modern technologies.
+
+## Required Skills
+
+- **Backend:** Node.js, Express.js, Python, or Java
+- **Frontend:** React, Vue.js, or Angular
+- **Database:** PostgreSQL, MongoDB, or MySQL
+- **API:** RESTful API design and development
+- **Version Control:** Git and GitHub
+- **Cloud:** AWS or Google Cloud Platform
+
+## Required Qualifications
+
+- **Experience:** Minimum 5 years of professional software development experience
+- **Education:** Bachelor's degree in Computer Science, Engineering, or related field
+- **Full-stack expertise in modern web technologies
+- Strong problem-solving and debugging skills
+- Experience with agile development methodologies
+
+## Preferred Skills
+
+- Docker and Kubernetes
+- CI/CD pipeline experience
+- GraphQL
+- TypeScript
+- Microservices architecture
+- Test-driven development (TDD)
+- Experience with Next.js or similar frameworks
+
+## Responsibilities
+
+- Design and develop robust, scalable web applications
+- Write clean, maintainable, and well-tested code
+- Collaborate with cross-functional teams
+- Participate in code reviews and technical discussions
+- Mentor junior developers
+- Troubleshoot and resolve production issues
+
+## Nice to Have
+
+- Open source contributions
+- Technical blog or publications
+- Experience with serverless architecture
+- Knowledge of DevOps practices
+- Familiarity with Redis or similar caching systems
+
+## What We Offer
+
+- Competitive salary and equity
+- Remote-friendly work environment
+- Professional development opportunities
+- Health insurance and benefits
