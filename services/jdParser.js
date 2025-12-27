@@ -83,84 +83,112 @@ class JDParser {
     buildExtractionPrompt(jd) {
         return `SYSTEM ROLE
 -----------
-You are a STRICT but FAIR ATS-style Job Description Analyzer.
+You are an EXPERT ATS Job Description Analyzer. Your job is to ALWAYS extract structured data from ANY job description, even if information is implicit or scattered.
 
-You must extract requirements intelligently, understanding that:
-- Skills can be expressed as abbreviations (OOP, DBMS, HTML, CSS, SQL)
-- Competencies have equivalent forms ("Java" = "Java Development")  
-- Wording varies between job descriptions
-
---------------------------------------------------
-CORE PRINCIPLE (NON-NEGOTIABLE)
---------------------------------------------------
-Extract requirements by MEANING, not exact wording.
-
-Understand equivalence:
-- Abbreviation ⇄ Full form
-  ("OOP" ⇄ "Object-Oriented Programming")
-  
-- Skill ⇄ Skill-in-context
-  ("Java" ⇄ "Java Development")
-  
-- Task ⇄ Responsibility
-  ("Hiring" ⇄ "Talent Acquisition")
+CRITICAL REQUIREMENTS:
+- You MUST extract at least 3-5 required skills from EVERY job description
+- If skills aren't explicitly listed, INFER them from responsibilities and job title
+- Even vague job descriptions have extractable requirements
 
 --------------------------------------------------
-EXTRACTION RULES
+EXTRACTION RULES (MANDATORY)
 --------------------------------------------------
-1. Extract CORE skill names (prefer shorter/common form)
-   - "Java Development" → Extract as "Java"
-   - "Object-Oriented Programming" → Extract as "OOP"
-   - "Database Management Systems" → Extract as "DBMS"
 
-2. Avoid over-expansion
-   - Extract "Python" not "Python Programming Skills"
-   - Extract "React" not "React.js Framework Development"
+1. **Required Skills** - ALWAYS extract (minimum 3-5 skills):
+   - Look for explicit mentions: "must have", "required", "essential"
+   - If not explicit, INFER from:
+     * Job title (e.g., "Software Engineer" → Java, Python, or similar)
+     * Responsibilities (e.g., "manage databases" → SQL, Database Management)
+     * Technologies mentioned anywhere in the description
+   - Extract CORE skill names (prefer shorter/common forms):
+     * "Java Development" → "Java"
+     * "Object-Oriented Programming" → "OOP"
+     * "Database Management Systems" → "DBMS"
 
-3. Recognize common abbreviations:
-   - Technical: OOP, DBMS, RDBMS, HTML, CSS, SQL, API, REST, JSON, XML
-   - Cloud: AWS, GCP, Azure
-   - Processes: CI/CD, ML, AI, DevOps
+2. **Preferred Skills** - Extract if mentioned:
+   - "Nice to have", "preferred", "bonus", "plus"
+   - Technologies mentioned without "required" emphasis
 
-4. Distinguish required vs preferred:
-   - "Must have" / "Required" / "Essential" → requiredSkills
-   - "Nice to have" / "Preferred" / "Bonus" → preferredSkills
-   - If unclear, default to requiredSkills
+3. **Experience** - Extract years:
+   - Look for: "X years", "X+ years", "minimum X years"
+   - If range given (e.g., "3-5 years"), use minimum number
+   - If not specified: return 0
+
+4. **Education** - Extract degree requirement:
+   - Bachelor's, Master's, PhD, etc.
+   - If not specified: return null
+
+5. **Keywords** - Extract 10-15 relevant terms:
+   - Domain terms (e.g., "backend", "frontend", "agile", "cloud")
+   - Industry terms
+   - Process/methodology terms
+
+6. **Responsibilities** - Extract 3-5 key duties:
+   - Main tasks the role involves
 
 --------------------------------------------------
-EXTRACTION TASK
+COMMON ABBREVIATIONS TO RECOGNIZE
 --------------------------------------------------
-Analyze this job description and extract:
+- Technical: OOP, DBMS, RDBMS, HTML, CSS, SQL, API, REST, JSON, XML, UI, UX
+- Cloud: AWS, GCP, Azure, S3, EC2, Lambda
+- Processes: CI/CD, ML, AI, DevOps, Agile, Scrum
+- Languages: JS (JavaScript), TS (TypeScript), Py (Python)
+- Frameworks: React, Angular, Vue, Django, Flask, Spring
 
-1. requiredSkills: Essential skills (use core names, recognize abbreviations)
-2. preferredSkills: Nice-to-have skills
-3. requiredExperience: Minimum years (number, 0 if not specified)
-4. educationRequirement: Minimum degree (string or null)
-5. responsibilities: Key job duties
-6. keywords: Important domain/industry terms
-
-JOB DESCRIPTION:
+--------------------------------------------------
+JOB DESCRIPTION TO ANALYZE
+--------------------------------------------------
 ${jd}
 
 --------------------------------------------------
 OUTPUT FORMAT (STRICT JSON ONLY)
 --------------------------------------------------
-Return ONLY valid JSON (no markdown, no extra text):
+Return ONLY valid JSON (no markdown, no extra text, no explanation):
 
 {
-  "requiredSkills": ["Java", "OOP", "Spring Boot", "MySQL"],
-  "preferredSkills": ["AWS", "Docker"],
-  "requiredExperience": 3,
-  "educationRequirement": "Bachelor's degree in Computer Science",
-  "responsibilities": ["Design backend services", "Write maintainable code"],
-  "keywords": ["backend", "microservices", "agile"]
+  "requiredSkills": ["Skill1", "Skill2", "Skill3", "..."],
+  "preferredSkills": ["Skill1", "Skill2", "..."],
+  "requiredExperience": 0,
+  "educationRequirement": "Degree or null",
+  "responsibilities": ["Task1", "Task2", "Task3"],
+  "keywords": ["keyword1", "keyword2", "keyword3", "..."]
 }
 
-CRITICAL:
-- Use core skill names (short forms when common)
-- Recognize abbreviations automatically
-- Extract by meaning, not exact wording
-- Return ONLY valid JSON`;
+EXAMPLES:
+
+Example 1 - Clear JD:
+Job Description: "We need a Senior Java Developer with 5+ years experience. Must have Java, Spring Boot, MySQL. Nice to have AWS, Docker."
+
+Output:
+{
+  "requiredSkills": ["Java", "Spring Boot", "MySQL"],
+  "preferredSkills": ["AWS", "Docker"],
+  "requiredExperience": 5,
+  "educationRequirement": null,
+  "responsibilities": ["Develop backend services", "Write maintainable code"],
+  "keywords": ["backend", "senior", "developer", "cloud"]
+}
+
+Example 2 - Vague JD (IMPORTANT!):
+Job Description: "Looking for a marketing professional to manage our social media and create content."
+
+Output:
+{
+  "requiredSkills": ["Marketing", "Social Media", "Content Creation", "Digital Marketing", "SEO"],
+  "preferredSkills": ["Analytics", "Paid Advertising"],
+  "requiredExperience": 0,
+  "educationRequirement": null,
+  "responsibilities": ["Manage social media", "Create content", "Build brand awareness"],
+  "keywords": ["marketing", "social", "content", "digital", "branding"]
+}
+
+CRITICAL REMINDERS:
+✓ ALWAYS extract at least 3-5 required skills (infer if needed!)
+✓ Use short/common skill names
+✓ Recognize abbreviations
+✓ Return ONLY valid JSON
+✓ Do NOT skip fields - return empty arrays [] or null if truly nothing found`
+            ;
     }
 
     /**

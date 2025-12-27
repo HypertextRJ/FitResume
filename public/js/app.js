@@ -6,6 +6,14 @@
 // State
 let uploadedFile = null;
 
+// Helper function to sanitize values - never show null/undefined to user
+function sanitizeValue(value, defaultText = 'Not specified') {
+  if (value === null || value === undefined || value === 'null' || value === 'undefined' || value === '') {
+    return defaultText;
+  }
+  return value;
+}
+
 // DOM Elements
 const uploadZone = document.getElementById('uploadZone');
 const uploadPlaceholder = document.getElementById('uploadPlaceholder');
@@ -628,9 +636,9 @@ function renderBreakdown(breakdown, justification) {
 
             ${item.category === 'Education' && item.details ? `
               <div class="skill-cloud" style="margin-top: 0.5rem;">
-                <span class="skill-tag" style="background:rgba(59,130,246,0.1); color:#60a5fa; border-color:rgba(59,130,246,0.3);">🎓 Required: ${item.details.required}</span>
-                <span class="skill-tag" style="background:${item.earned > 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'}; color:${item.earned > 0 ? 'var(--color-success)' : 'var(--color-error)'}; border-color:${item.earned > 0 ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'};"> 
-                  ${item.earned > 0 ? '✓' : '✗'} Found: ${item.details.found}
+                <span class="skill-tag" style="background:rgba(59,130,246,0.1); color:#60a5fa; border-color:rgba(59,130,246,0.3);">🎓 Required: ${sanitizeValue(item.details.required, 'Any degree acceptable')}</span>
+                <span class="skill-tag" style="background:${item.earned > 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'}; color:${item.earned > 0 ? 'var(--color-success)' : 'var(--color-error)'}; border-color:${item.earned > 0 ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'};">  
+                  ${item.earned > 0 ? '✓' : '✗'} Found: ${sanitizeValue(item.details.found, 'No degree found in resume')}
                 </span>
               </div>
             ` : ''}
