@@ -33,6 +33,14 @@ class AdvancedInsights {
         const missingSkills = matchResult.breakdown.requiredSkills ?
             matchResult.breakdown.requiredSkills.missingSkills : [];
 
+        // Debug logging to understand what's happening
+        console.log('🔍 Skill Evidence Debug:', {
+            hasRequiredSkills: !!matchResult.breakdown.requiredSkills,
+            totalRequired: matchResult.breakdown.requiredSkills?.totalRequired || 0,
+            matchedCount: matchedSkills.length,
+            missingCount: missingSkills.length
+        });
+
         // Analyze evidence for matched skills AND mark missing skills as MISSING evidence
         const skillEvidence = skillEvidenceAnalyzer.analyzeSkillEvidence(matchedSkills, resumeData, missingSkills);
         const evidenceSummary = skillEvidenceAnalyzer.generateSummary(skillEvidence);
